@@ -1,23 +1,131 @@
-![GitHub repo size](https://img.shields.io/github/repo-size/Leonardo-Monaro/Dashboard_Gastos?style=for-the-badge)
-![GitHub language count](https://img.shields.io/github/languages/count/Leonardo-Monaro/Dashboard_Gastos?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/Leonardo-Monaro/Dashboard_Gastos?style=for-the-badge)
-![Bitbucket open issues](https://img.shields.io/bitbucket/issues/Leonardo-Monaro/Dashboard_Gastos?style=for-the-badge)
-![Bitbucket open pull requests](https://img.shields.io/bitbucket/pr-raw/Leonardo-Monaro/Dashboard_Gastos?style=for-the-badge)
+# ⭐ amazon-medallion-databricks
 
-<div display="inline">
-&nbsp;&nbsp;<img width=100 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg" />&nbsp;&nbsp;
-&nbsp;&nbsp;<img width=100 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/scikitlearn/scikitlearn-original.svg" />&nbsp;&nbsp;
-&nbsp;&nbsp;<img width=100 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pandas/pandas-original-wordmark.svg" />&nbsp;&nbsp;
-  <img width=100 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/streamlit/streamlit-plain-wordmark.svg" />
-<div>
+Pipeline ETL com **Arquitetura Medallion** (Bronze → Silver → Gold) no **Databricks**, processando ~1,4 milhão de produtos da Amazon em 248 categorias, com PySpark, SQL e Delta Lake.
 
-> Esse projeto foi um desenvolvimento próprio, onde foi criado um dashboard utilizando streamlit juntamente com uma integração com o ChatGPT. Onde foram analisadas bases de
-dados do [kaggle](*inserir link da base de dados utilizada*). O programa faz a leitura, tratamento e posteriormente faz a plotagem das views principais além da análise da IA.
-Tendo a possibilidade de fazer mais perguntas para a IA e navegar entre diferentes telas.
+![Databricks](https://img.shields.io/badge/Databricks-FF3621?style=flat-square&logo=databricks&logoColor=white)
+![PySpark](https://img.shields.io/badge/PySpark-E25A1C?style=flat-square&logo=apachespark&logoColor=white)
+![Delta Lake](https://img.shields.io/badge/Delta_Lake-00ADD4?style=flat-square&logo=delta&logoColor=white)
+![SQL](https://img.shields.io/badge/SQL-4479A1?style=flat-square&logo=postgresql&logoColor=white)
 
-## 💻 Pré-requisitos
+> 🇺🇸 **Summary:** end-to-end data engineering project. Raw Amazon product data (~1.4M rows, 248 categories) is ingested, cleaned and modeled through Bronze, Silver and Gold Delta tables on Databricks, ending in analytics-ready tables and a dashboard.
 
-Antes de começar, verifique se você atendeu aos seguintes requisitos:
+---
 
-- Você instalou a versão mais recente de `<Python / Libs: Pandas, Scikit-Learn, Streamlit, Plotly_Express />` 
-- Você tem uma máquina `<Windows / Linux / Mac .>`
+## 🎯 Problema de negócio
+
+Dados brutos de catálogo de e-commerce chegam inconsistentes (preços como texto, nulos, duplicados, categorias soltas). O objetivo é criar uma base **confiável e reutilizável** para responder perguntas como:
+
+- Qual o preço médio e a faixa de preço por categoria?
+- Quais categorias concentram mais produtos bem avaliados?
+- Como se distribuem avaliações, descontos e preços entre categorias?
+
+<!-- PREENCHER: ajuste as perguntas às que o seu Gold realmente responde -->
+
+---
+
+## 🏗️ Arquitetura
+
+```mermaid
+flowchart LR
+    A[(Dataset bruto<br/>CSV)] --> B[🥉 Bronze<br/>dados crus em Delta]
+    B --> C[🥈 Silver<br/>limpeza, tipagem,<br/>deduplicação]
+    C --> D[🥇 Gold<br/>tabelas analíticas<br/>por categoria]
+    D --> E[📊 Dashboard / SQL]
+```
+
+| Camada | Objetivo | Principais transformações |
+|---|---|---|
+| **Bronze** | Preservar o dado como chegou | Ingestão do CSV, metadados de carga (data, origem) |
+| **Silver** | Dado limpo e confiável | Tipagem, tratamento de nulos, remoção de duplicados, padronização de texto/preço |
+| **Gold** | Pronto para análise | Agregações por categoria, métricas de preço e avaliação |
+
+<!-- PREENCHER: confira se a tabela reflete exatamente o que o seu código faz -->
+
+---
+
+## 🧰 Stack
+
+Databricks · PySpark · Spark SQL · Delta Lake · Python
+
+---
+
+## 📁 Estrutura do repositório
+
+```
+amazon-medallion-databricks/
+├── notebooks/
+│   ├── 01_bronze_ingestion.ipynb
+│   ├── 02_silver_transformation.ipynb
+│   └── 03_gold_aggregations.ipynb
+├── sql/                  # consultas analíticas sobre a camada Gold
+├── docs/
+│   ├── architecture.png  # diagrama (opcional, além do Mermaid)
+│   └── screenshots/      # prints do workflow e do dashboard
+├── data/sample/          # amostra pequena (NÃO suba o dataset completo)
+└── README.md
+```
+
+---
+
+## ✅ Qualidade de dados
+
+| Verificação | Camada | Resultado |
+|---|---|---|
+| Linhas de entrada → saída | Bronze → Silver | [PREENCHER] → [PREENCHER] |
+| Registros duplicados removidos | Silver | [PREENCHER] |
+| Nulos em colunas-chave | Silver | [PREENCHER] |
+| Preços inválidos (≤ 0 ou fora do padrão) | Silver | [PREENCHER] |
+| Categorias distintas | Gold | 248 |
+
+---
+
+## 📊 Principais resultados
+
+<!-- PREENCHER com 3 a 5 insights reais vindos da camada Gold, por exemplo: -->
+- [PREENCHER: insight 1, ex.: categorias com maior preço médio]
+- [PREENCHER: insight 2]
+- [PREENCHER: insight 3]
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+---
+
+## 🧠 Decisões técnicas
+
+- **Por que Medallion?** Separa responsabilidades, permite reprocessar uma camada sem refazer as outras e facilita auditoria.
+- **Por que Delta Lake?** Transações ACID, *time travel* e `MERGE`, essenciais para evoluir para cargas incrementais.
+- **[PREENCHER]** Outras escolhas suas (particionamento, formato de colunas, tratamento de preço etc.) e o motivo.
+
+---
+
+## ⚡ Otimizações
+
+<!-- PREENCHER só com o que você de fato aplicar e medir -->
+| Técnica | Antes | Depois |
+|---|---|---|
+| `OPTIMIZE` / `ZORDER` por categoria | [PREENCHER] s | [PREENCHER] s |
+| Particionamento | [PREENCHER] | [PREENCHER] |
+
+---
+
+## ▶️ Como reproduzir
+
+1. Crie uma conta no [Databricks Free Edition](https://www.databricks.com/learn/free-edition).
+2. Baixe o dataset: [PREENCHER: link da fonte, ex.: Kaggle].
+3. Faça upload para um Volume/DBFS e ajuste o caminho no notebook `01_bronze_ingestion`.
+4. Execute os notebooks na ordem `01 → 02 → 03`.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Carga incremental com Auto Loader ou `MERGE INTO`
+- [ ] Orquestração com Databricks Workflows
+- [ ] Testes de qualidade automatizados (pytest) e CI com GitHub Actions
+- [ ] Dashboard no Databricks SQL ou Power BI
+
+---
+
+## 👤 Autor
+
+**Leonardo Monaro** · [LinkedIn](https://www.linkedin.com/in/SEU-USUARIO/)
